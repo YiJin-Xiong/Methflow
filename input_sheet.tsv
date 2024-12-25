@@ -1,0 +1,2 @@
+Group_ID	Sample_ID  	Analyte_Type	Pore_Type	Path	Genome
+G1	demo		r9	./demo/demo_output.pod5	./demo/chm13v2.0.fa
