@@ -1,20 +1,27 @@
 process Clair3 {
     label 'Clair3'
 
-    publishDir "${params.outdir}/SNV/",
+    publishDir "${params.outdir}/vcf/",
         mode: "copy",
-        pattern: "*_aligned.sam"
+        pattern: "temp"
 
     input:
     tuple val(group_id), val(sample_id), val(analyte_type), val(pore_type), path(pod5_dir), path(genome), val(species), val(sample_rate)
     path(aligned_sorted_bam)
 
     output:
-    path("SNV"), emit: clair3_output
+    path("temp"), emit: clair3_output_dir
+    path("${sample_id}_clair3_merge.vcf.gz"), emit: clair3_merge_vcf
+    //path("clair3_pileup.vcf.gz.tbi"), emit: clair3_merge_vcf_tbi
 
     script:
     def include_all_ctgs = ( species == 'Human') ? "" : "--include_all_ctgs"
     def clar3_model_path = file(params.clar3_model_path)
+    //--whatshap="${params.whatshap_path}" \
+    //def tmp = file("${params.outdir}/vcf/temp/merge_output.vcf.gz")
+
+    //cp temp/merge_output.vcf.gz ${sample_id}_clair3_merge.vcf.gz
+    //cp temp/pileup.vcf.gz.tbi ${sample_id}_clair3_pileup.vcf.gz.tbi
 
     """
     samtools index ${aligned_sorted_bam}
@@ -27,9 +34,10 @@ process Clair3 {
         --threads=8 \
         --platform="ont" \
         --model_path=${clar3_model_path} \
-        --output="SNV" \
-        --whatshap="${params.whatshap_path}" \
+        --output="temp" \
         ${include_all_ctgs}
+
+    cp temp/merge_output.vcf.gz ${sample_id}_clair3_merge.vcf.gz
 
     """
 }
