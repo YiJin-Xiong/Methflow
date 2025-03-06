@@ -1,23 +1,20 @@
 process Modkit_pileup {
     label 'Modkit_pileup'
 
-    publishDir "${params.outdir}/DMR/bed",
+    publishDir "${params.outdir}/DMR/haplotype/",
         mode: "copy",
         pattern: "*"
 
     input:
     tuple val(group_id), val(sample_id), val(analyte_type), val(pore_type), path(pod5_dir), path(genome), val(species), val(sample_rate)
-    path(aligned_sorted_bam)
+    path(haplotagged_bam)
 
     output:
-    path("${sample_id}_modkit_pileup.bed"), emit: modkit_pileup_bed
-    path("${sample_id}_modkit_pileup.log"), emit: modkit_pileup_log
-    path("${sample_id}_modkit_pileup.bed.gz"), emit: modkit_pileup_bed_gz
-    path("${sample_id}_modkit_pileup.bed.gz.tbi"), emit: modkit_pileup_bed_gz_tbi
-
+    env 'bed_num', emit: bed_num
+    path "*.bed", emit: bed_files
 
     script:
-    //nextflow run main.nf --input input_sheet.tsv --modkit_input results/align/demo_aligned_sorted.bam --region chr1 --filter_threshold 0.9 --mod_thresholds h:0.8 --modkit_motif "CGCG 0"
+    //nextflow run main.nf --input input_sheet.tsv --modkit_input results/whatshap/demo_whatshap_haplotagged.bam --region chr1 --filter_threshold 0.9 --mod_thresholds h:0.8 --modkit_motif "CGCG 0"
 
     def region = params.region ? "--region $params.region" : ''
     def filter_threshold = params.filter_threshold ? "--filter-threshold $params.filter_threshold" : ''
@@ -26,20 +23,21 @@ process Modkit_pileup {
     def motif = params.modkit_motif ? "--motif $params.modkit_motif" : ''
 
     """
-    samtools index ${aligned_sorted_bam}
+    samtools index ${haplotagged_bam}
 
     samtools faidx ${genome}
 
-    modkit pileup ${aligned_sorted_bam} ${sample_id}_modkit_pileup.bed \
+    modkit pileup ${haplotagged_bam} . \
       --ref ${genome} \
       --cpg --combine-strands \
+      --partition-tag HP \
+      --prefix ${sample_id}_haplotype \
       ${ignore} \
-      ${region} ${filter_threshold} ${mod_thresholds} ${motif} \
-      --log-filepath ${sample_id}_modkit_pileup.log
+      ${region} ${filter_threshold} ${mod_thresholds} ${motif}
     
-    bgzip -k ${sample_id}_modkit_pileup.bed
-    tabix -p bed ${sample_id}_modkit_pileup.bed.gz
-      
+    bed_num=\$(ls -1 *.bed | wc -l)
+    echo \$bed_num
+    
     """
 }
 
@@ -51,38 +49,34 @@ process Modkit_DMR {
         pattern: "*"
 
     input:
+    val bed_num
     tuple val(group_id), val(sample_id), val(analyte_type), val(pore_type), path(pod5_dir), path(genome), val(species), val(sample_rate)
-    path(norm_pileup_bed)
-    path(tumor_pileup_bed)
+    path(bed_hp1)
+    path(bed_hp2)
 
     output:
-    path("${norm_id}_${tumor_id}_modkit_dmr.bed"), emit: modkit_pileup_bed
-    path("${norm_id}_${tumor_id}_modkit_dmr.log"), emit: modkit_pileup_log
+    path("${sample_id}_1&2_modkit_dmr.bed"), emit: modkit_dmr_bed
+    path("${sample_id}_1&2_modkit_dmr.log"), emit: modkit_dmr_log
 
 
     script:
     //nextflow run main.nf --input input_sheet.tsv --norm_pileup_bed results/DMR/bed/demo_modkit_pileup.bed.gz --tumor_pileup_bed results/DMR/bed/demo1_modkit_pileup.bed.gz
-    norm_index = norm_pileup_bed.toString().indexOf("_modkit")
-    norm_id = norm_pileup_bed.toString().substring(0, norm_index)
-    tumor_index = tumor_pileup_bed.toString().indexOf("_modkit")
-    tumor_id = tumor_pileup_bed.toString().substring(0, tumor_index)
-
-    def regions = params.regions ? "--region " + file(params.regions) : ''
+    def dmr_regions = params.dmr_regions ? "--region " + file(params.dmr_regions) : ''
 
     """
-    tabix -p bed ${norm_pileup_bed}
-    tabix -p bed ${tumor_pileup_bed}
+    tabix -p bed ${bed_hp1}
+    tabix -p bed ${bed_hp2}
 
     modkit dmr pair \
-      -a ${norm_pileup_bed} \
-      -b ${tumor_pileup_bed} \
-      -o ${norm_id}_${tumor_id}_modkit_dmr.bed \
+      -a ${bed_hp1} \
+      -b ${bed_hp2} \
+      -o "${sample_id}_1&2_modkit_dmr.bed" \
       --ref ${genome} \
-      ${regions} \
+      ${dmr_regions} \
       --base C \
       --threads 4 \
       -f --header \
-      --log-filepath ${norm_id}_${tumor_id}_modkit_dmr.log
+      --log-filepath "${sample_id}_1&2_modkit_dmr.log"
       
     """
 }
