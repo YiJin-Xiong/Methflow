@@ -35,6 +35,7 @@ process WhatsHap {
     whatshap phase --ignore-read-groups \
         -o ${sample_id}_phased.vcf \
         --reference=${genome} \
+        --tag=HP \
         ${sample_id}_SNV_PASS.vcf ${aligned_sorted_bam}
 
     bgzip -@ 4 ${sample_id}_phased.vcf && \

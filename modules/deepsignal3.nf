@@ -78,7 +78,8 @@ process Deepsignal3_call_freq {
     """
     deepsignal3 call_freq \
         --input_path ${call_mods_tsv_dir} \
-        --result_file ${sample_id}_pod5.CG.call_mods.frequency.tsv
+        --result_file ${sample_id}_pod5.CG.call_mods.frequency.tsv \
+        --bed --sort
     
     """
 }

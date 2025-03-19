@@ -1,7 +1,7 @@
 process Dorado_basecall {
     label 'dorado_basecall'
 
-    publishDir "${params.outdir}/bam/",
+    publishDir "${params.outdir}/basecall/",
         mode: "copy",
         pattern: "*_basecall.bam"
 
@@ -66,7 +66,7 @@ process Dorado_basecall {
 process Dorado_align {
     label 'dorado_align'
 
-    publishDir "${params.outdir}/bam/",
+    publishDir "${params.outdir}/basecall/",
         mode: "copy",
         pattern: "*_aligned.bam"
 
