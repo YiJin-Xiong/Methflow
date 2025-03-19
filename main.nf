@@ -14,6 +14,13 @@ include { WhatsHap } from './modules/whatshap.nf'
 include { Modkit_pileup } from './modules/modkit.nf'
 include { Modkit_DMR } from './modules/modkit.nf'
 include { bgzip_tabix } from './modules/bgzip_tabix.nf'
+include { DSS_preprocess } from './modules/dss.nf'
+include { DSS } from './modules/dss.nf'
+include { PoreMeth2_preprocess as PoreMeth2_preprocess_bam1 } from './modules/poremeth2.nf'
+include { PoreMeth2_preprocess as PoreMeth2_preprocess_bam2} from './modules/poremeth2.nf'
+include { PoreMeth2 } from './modules/poremeth2.nf'
+
+
 
 workflow {
     //nextflow run main.nf --input input_sheet.tsv 
@@ -28,6 +35,8 @@ workflow {
     //nextflow run main.nf --input input_sheet.tsv --modkit_input results/whatshap/demo_whatshap_haplotagged.bam
     //nextflow run main.nf --input input_sheet.tsv --modkit_input results/temp/subset_1/subset_1_whatshap_haplotagged.bam
     ////nextflow run main.nf --input input_sheet.tsv --norm_pileup_bed results/DMR/bed/demo_modkit_pileup.bed.gz --tumor_pileup_bed results/DMR/bed/demo1_modkit_pileup.bed.gz
+
+    //nextflow run main.nf --input input_sheet.tsv --bam1 results/temp/subset_1/subset_1_whatshap_haplotagged.bam --bam2 results/temp/subset_2/subset_2_whatshap_haplotagged.bam
 
     // generate input files, and send into Channels for pipelines
     if ( params.input.endsWith(".txt") || params.input.endsWith(".tsv") ) {
@@ -103,34 +112,32 @@ workflow {
     ///////////////WhatsHap( input_dorado.map {it -> [ it[0], it[1], it[2], it[3], it[4], it[5], it[6], it[7] ] } , Samtools_sort.out.aligned_sorted_bam , Clair3.out.clair3_merge_vcf)
 
     //modkit
-    def modkitinput = file(params.modkit_input)
-    Modkit_pileup( input_dorado.map {it -> [ it[0], it[1], it[2], it[3], it[4], it[5], it[6], it[7] ] } ,  modkitinput )
+    /////////def modkitinput = file(params.modkit_input)
+    /////////Modkit_pileup( input_dorado.map {it -> [ it[0], it[1], it[2], it[3], it[4], it[5], it[6], it[7] ] } ,  modkitinput )
     /////Modkit_pileup( input_dorado.map {it -> [ it[0], it[1], it[2], it[3], it[4], it[5], it[6], it[7] ] } , Samtools_sort.out.aligned_sorted_bam )
 
-    modkit_output_beds = Modkit_pileup.out.bed_files.flatten()
+    /////////modkit_output_beds = Modkit_pileup.out.bed_files.flatten()
     //modkit_output_beds.view()
-    bgzip_tabix(modkit_output_beds )
+    /////////bgzip_tabix(modkit_output_beds )
 
-    all_bedgz = bgzip_tabix.out.bed_gz.collect()
-    bed_hp1 = all_bedgz.flatten().filter{ it.name.contains('_1.bed.gz') }
-    bed_hp2 = all_bedgz.flatten().filter{ it.name.contains('_2.bed.gz') }
+    /////////all_bedgz = bgzip_tabix.out.bed_gz.collect()
+    /////////bed_hp1 = all_bedgz.flatten().filter{ it.name.contains('_1.bed.gz') }
+    /////////bed_hp2 = all_bedgz.flatten().filter{ it.name.contains('_2.bed.gz') }
     //bed_hp1.view()
     //bed_hp2.view()
 
     //Modkit_pileup.out.bed_num.view()
-    modkit_dmr_trigger = Modkit_pileup.out.bed_num.filter { it.toInteger() >= 2 }
-    Modkit_DMR( modkit_dmr_trigger, input_dorado.map {it -> [ it[0], it[1], it[2], it[3], it[4], it[5], it[6], it[7] ] } , bed_hp1, bed_hp2 )
+    /////////modkit_dmr_trigger = Modkit_pileup.out.bed_num.filter { it.toInteger() >= 2 }
+    /////////Modkit_DMR( modkit_dmr_trigger, input_dorado.map {it -> [ it[0], it[1], it[2], it[3], it[4], it[5], it[6], it[7] ] } , bed_hp1, bed_hp2 )
 
+    /////////DSS_preprocess( modkit_dmr_trigger, input_dorado.map {it -> [ it[0], it[1], it[2], it[3], it[4], it[5], it[6], it[7] ] } , bed_hp1, bed_hp2 )
+    /////////DSS( modkit_dmr_trigger, input_dorado.map {it -> [ it[0], it[1], it[2], it[3], it[4], it[5], it[6], it[7] ] } , DSS_preprocess.out.bed_preprocessed_hp1, DSS_preprocess.out.bed_preprocessed_hp2 )
 
-    //Modkit_pileuped_process( input_dorado.map {it -> [ it[0], it[1], it[2], it[3], it[4], it[5], it[6], it[7] ] }, Modkit_pileup.out.modkit_pileup_haplotype_dir )
-    
-    //  def dmr_norm = file( params.norm_pileup_bed )
-    //  def dmr_tumor = file( params.tumor_pileup_bed )
-    //  Modkit_DMR( input_dorado.map {it -> [ it[0], it[1], it[2], it[3], it[4], it[5], it[6], it[7] ] } ,  dmr_norm,  dmr_tumor)
-
-    //modkit_dmr_trigger作为Modkit_DMR的触发器，当bed_num>=2时才能调用Modkit_DMR()
-    //modkit_dmr_trigger = Modkit_pileuped_process.out.bed_num.filter { it >= 2 }
-    //Modkit_DMR( modkit_dmr_trigger, input_dorado.map {it -> [ it[0], it[1], it[2], it[3], it[4], it[5], it[6], it[7] ] } ,  Modkit_pileuped_process.out.bed_hp1_gz,  Modkit_pileuped_process.out.bed_hp2_gz)
+    def bam1 = file(params.bam1)
+    def bam2 = file(params.bam2)
+    PoreMeth2_preprocess_bam1(input_dorado.map {it -> [ it[0], it[1], it[2], it[3], it[4], it[5], it[6], it[7] ] }, bam1)
+    PoreMeth2_preprocess_bam2(input_dorado.map {it -> [ it[0], it[1], it[2], it[3], it[4], it[5], it[6], it[7] ] }, bam2)
+    PoreMeth2(PoreMeth2_preprocess_bam1.out.extracted_entroyp_tsv , PoreMeth2_preprocess_bam2.out.extracted_entroyp_tsv)
 
 
 }
