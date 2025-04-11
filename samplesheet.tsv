@@ -1,0 +1,5 @@
+Group_ID	Sample_ID  	Analyte_Type	Pore_Type	Path	Genome	Species	Sample_Rate
+hg002	hg002_subset1	DNA	r10	./demo/hg002/subset_1.pod5	./demo/chm13v2.0.fa	Human	5k
+hg002	hg002_subset2	DNA	r10	./demo/hg002/subset_2.pod5	./demo/chm13v2.0.fa	Human	5k
+hg003	hg002_subset3	DNA	r10	./demo/hg003/subset_3.pod5	./demo/chm13v2.0.fa	Human	5k
+hg003	hg002_subset4	DNA	r10	./demo/hg003/subset_4.pod5	./demo/chm13v2.0.fa	Human	5k
