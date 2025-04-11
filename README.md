@@ -8,7 +8,7 @@
 
 
 
-![methflow(v1.0.0)](E:\Postgraduate\项目\Methflow\methflow(v1.0.0).jpg)
+![methflow(v1.0.0)](docs/images/Methflow(v1.0.0).jpg)
 
 
 
