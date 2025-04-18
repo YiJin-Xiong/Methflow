@@ -1,7 +1,8 @@
 process SAMTOOLS_SAMTOBAM {
     label 'samtools_sam2bam'
 
-    conda "${params.project_dir}/environment.yml"
+    conda     (params.enable_conda ? "${params.project_dir}/environment.yml" : null)
+    container (params.use_docker ? "${params.docker_name}" : "${params.singularity_name}")
 
     publishDir "${params.outdir}/${sample_id}/alignment/",
         mode: "copy",

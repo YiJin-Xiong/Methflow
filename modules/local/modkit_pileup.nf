@@ -1,7 +1,8 @@
 process MODKIT_PILEUP {
     label 'Modkit_pileup'
 
-    conda "${params.project_dir}/environment.yml"
+    conda     (params.enable_conda ? "${params.project_dir}/environment.yml" : null)
+    container (params.use_docker ? "${params.docker_name}" : "${params.singularity_name}")
 
     publishDir "${params.outdir}/${sample_id}/DMR/haplotype/",
         mode: "copy",

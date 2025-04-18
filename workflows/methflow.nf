@@ -68,10 +68,7 @@ include { PILEUP_MODKIT                  } from '../subworkflows/local/pileup_mo
 include { DMR_DSS                        } from '../subworkflows/local/dmr_dss'
 include { DMR_POREMETH2                  } from '../subworkflows/local/dmr_poremeth2'
 
-
 include { MODKIT_DMR } from '../modules/local/modkit_DMR'
-
-
 
 workflow METHFLOW {
 
@@ -133,11 +130,11 @@ workflow METHFLOW {
     }
 
     // =============================================================================
-    if ( params.modcall_tool == 'rockfish' ){
+    if ( params.modcall_tool == 'deepsignal3' ){
         /*
-         * SUBWORKFLOW: Modcall with rockfish
+         * SUBWORKFLOW: Modcall with deepsignal3
          */
-        MODCALL_ROCKFISH( ch_input,ch_aligned_sorted_bam )
+        MODCALL_DEEPSIGNAL3( ch_input,ch_aligned_sorted_bam )
         
     } else if ( params.modcall_tool == 'all' ){
         /*
@@ -148,9 +145,9 @@ workflow METHFLOW {
         
     } else {
         /*
-         * SUBWORKFLOW: Modcall with deepsignal3 [default]
+         * SUBWORKFLOW: Modcall with rockfish [default]
          */
-        MODCALL_DEEPSIGNAL3( ch_input,ch_aligned_sorted_bam )
+        MODCALL_ROCKFISH( ch_input,ch_aligned_sorted_bam )
     }
 
 

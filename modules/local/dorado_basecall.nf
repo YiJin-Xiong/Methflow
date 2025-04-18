@@ -2,7 +2,8 @@ process DORADO_BASECALL {
     // tag "$meta.id"
     label 'dorado_basecall'
 
-    conda "${params.project_dir}/environment.yml"
+    conda     (params.enable_conda ? "${params.project_dir}/environment.yml" : null)
+    container (params.use_docker ? "${params.docker_name}" : "${params.singularity_name}")
 
     publishDir "${params.outdir}/${sample_id}/basecall/",
         mode: "copy",

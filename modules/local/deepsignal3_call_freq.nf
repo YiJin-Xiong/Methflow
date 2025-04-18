@@ -1,6 +1,8 @@
 process DEEPSIGNAL3_CALL_FREQ {
     label 'deepsignal3'
 
+    container (params.use_docker ? "${params.docker_name}" : "${params.singularity_name}")
+
     queue true
 
     publishDir "${params.outdir}/${sample_id}/modcall/",

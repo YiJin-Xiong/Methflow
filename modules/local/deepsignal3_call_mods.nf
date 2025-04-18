@@ -1,6 +1,8 @@
 process DEEPSIGNAL3_CALL_MODS{
     label 'deepsignal3'
 
+    container (params.use_docker ? "${params.docker_name}" : "${params.singularity_name}")
+
     publishDir "${params.outdir}/${sample_id}/modcall/",
         mode: "copy",
         pattern: "*_pod5.CG.call_mods.tsv"
@@ -53,7 +55,7 @@ process DEEPSIGNAL3_CALL_MODS{
 
     
     """
-    deepsignal3 --pod5 call_mods \
+    deepsignal3 call_mods \
         --input_path ${pod5_dir} \
         --bam ${basecall_bam_dir} \
         --model_path ${deepsignal3_model_dir} \

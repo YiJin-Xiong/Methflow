@@ -1,8 +1,9 @@
 process CLAIR3_SNVCALL {
     label 'Clair3'
 
-    conda "${params.project_dir}/environment-clair3.yml"
-    //conda '/home/xyj/anaconda3/envs/clair3'
+    conda     (params.enable_conda ? "${params.project_dir}/environment-clair3.yml" : null)
+    container (params.use_docker ? "${params.clair3_docker_name}" : "${params.clair3_singularity_name}")
+    //container "hkubal/clair3:latest"
 
     publishDir "${params.outdir}/${sample_id}/SNVcall/",
         mode: "copy",
@@ -27,13 +28,14 @@ process CLAIR3_SNVCALL {
     def qual             = params.qual           ? "--qual=" + params.qual : ''
 
     //--whatshap="${params.whatshap_path}" \
+    // /opt/bin/run_clair3.sh \
 
     """
     samtools index ${aligned_sorted_bam}
 
     samtools faidx ${genome}
 
-    ~/tools/Clair3/run_clair3.sh \
+    /opt/bin/run_clair3.sh \
         --bam_fn=${aligned_sorted_bam} \
         --ref_fn=${genome} \
         --threads=8 \

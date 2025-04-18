@@ -8,7 +8,7 @@
 
 
 
-![methflow(v1.0.0)](docs/images/methflow(v1.0.0).jpg)
+![methflow(v1.0.0)](E:\Postgraduate\项目\Methflow\methflow(v1.0.0).jpg)
 
 
 
@@ -76,7 +76,8 @@ Now, you can run the pipeline using default parameters as:
 ```bash
 nextflow run main.nf \
     --input samplesheet.tsv \
-    --protocol DNA 
+    --protocol DNA \
+    --profile <docker/singularity>
 ```
 
 > [!WARNING]
@@ -105,9 +106,9 @@ Folder structures of the outputs:
     │   └── aligned_sorted.bam
     │
     ├── modcall
-    │   ├── pod5.CG.call_mods.tsv
-    │   ├── pod5.CG.call_mods.frequency.tsv
-    │   ├── predictions.tsv
+    │   ├── pod5.CG.call_mods.tsv (deepsignal3)
+    │   ├── pod5.CG.call_mods.frequency.tsv (deepsignal3)
+    │   ├── predictions.tsv (rockfish)
     │   └── 
     │
     ├── SNVcall
@@ -126,7 +127,7 @@ Folder structures of the outputs:
     ├── DMR
     │   ├── haplotype
     │   │   ├── *.bed
-    │    │   │
+    │   │   │
     │   ├── PoreMeth2/ 
     │   │   ├── extracted_sorted.entropy.file.tsv
     │   │   ├── ExpQualityPlot.png

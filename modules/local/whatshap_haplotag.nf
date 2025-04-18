@@ -1,9 +1,10 @@
 process WHATSHAP_HAPLOTAG {
     label 'WhatsHap_haplotag'
 
-    conda "${params.project_dir}/environment.yml"
+    conda     (params.enable_conda ? "${params.project_dir}/environment.yml" : null)
+    container (params.use_docker ? "${params.docker_name}" : "${params.singularity_name}")
 
-    publishDir "${params.outdir}/${sample_id}/whatshap/",
+    publishDir "${params.outdir}/${sample_id}/phase/",
         mode: "copy",
         pattern: "*"
 
