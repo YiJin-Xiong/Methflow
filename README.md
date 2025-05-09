@@ -8,7 +8,7 @@
 
 
 
-![methflow(v1.0.0)](docs/images/methflow(v1.2.0).jpg)
+![methflow(v1.2.0)](docs/images/methflow(v1.2.0).png)
 
 
 ## Pipeline Summary
